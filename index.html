@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Académico - MVP (10 Níveis)</title>
+    <style>
+        /* ==========================================================
+           TEMA DARK & ESTILOS GLOBAIS
+           ========================================================== */
+        :root {
+            --bg-color: #121214;
+            --panel-bg: #202024;
+            --text-color: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --primary: #8257e5;
+            --primary-hover: #9466ff;
+            --success: #04d361;
+            --danger: #e83f5b;
+            --keyboard-bg: #29292e;
+            --keyboard-hover: #323238;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px 40px;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid #323238;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        #level-indicator {
+            font-weight: bold;
+            color: var(--text-muted);
+            background-color: #323238;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        /* Seção Didática */
+        .intro-section {
+            grid-column: 1 / -1;
+            background-color: var(--panel-bg);
+            padding: 25px 30px;
+            border-radius: 8px;
+            border: 1px solid #323238;
+            margin-bottom: -20px; /* Compensa o gap da grelha */
+        }
+        .intro-section h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .intro-section p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #c4c4cc;
+        }
+        .intro-section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            color: #c4c4cc;
+            line-height: 1.6;
+        }
+        .intro-section strong {
+            color: var(--text-color);
+        }
+
+        /* Dicionário de Símbolos */
+        .symbol-dict {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .symbol-card {
+            background-color: var(--keyboard-bg);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #323238;
+            font-size: 0.95rem;
+            color: #c4c4cc;
+            line-height: 1.5;
+        }
+        .symbol-card .sym {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-right: 5px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .symbol-card .sym-title {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+        .symbol-card .sym-example {
+            color: var(--text-muted);
+            display: block;
+            margin-top: 8px;
+            font-style: italic;
+            border-top: 1px dashed #323238;
+            padding-top: 8px;
+        }
+
+        /* ==========================================================
+           LAYOUT PRINCIPAL (GRID)
+           ========================================================== */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Lado Esquerdo: Editor e Teclado */
+        .editor-section {
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 1px solid #323238;
+        }
+
+        .problem-desc {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .alphabet {
+            font-family: monospace;
+            background: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--primary);
+        }
+
+        #regex-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5rem;
+            font-family: monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 2px solid #323238;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #regex-input:focus {
+            border-color: var(--primary);
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+        }
+
+        .key-btn {
+            background-color: var(--keyboard-bg);
+            color: var(--text-color);
+            border: 1px solid #323238;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: monospace;
+        }
+
+        .key-btn:hover {
+            background-color: var(--keyboard-hover);
+            border-color: var(--primary);
+        }
+
+        /* Lado Direito: Testes */
+        .tests-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .test-column {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #323238;
+        }
+
+        .test-column h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .test-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .test-item {
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #323238;
+            transition: all 0.3s ease;
+        }
+
+        .empty-set-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 20px 0;
+            background-color: var(--bg-color);
+            border-radius: 6px;
+            border: 1px dashed #323238;
+        }
+
+        /* Estados de Validação */
+        .test-item.pass {
+            border-color: var(--success);
+            box-shadow: 0 0 10px rgba(4, 211, 97, 0.2);
+            color: var(--success);
+        }
+
+        .test-item.fail {
+            border-color: var(--danger);
+            box-shadow: 0 0 10px rgba(232, 63, 91, 0.2);
+            color: var(--danger);
+        }
+
+        .status-icon {
+            font-weight: bold;
+        }
+
+        /* Ações e Sucesso */
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #next-btn {
+            background-color: var(--success);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            transition: background-color 0.2s;
+        }
+
+        #next-btn:hover {
+            background-color: #04b353;
+        }
+
+        #success-message {
+            color: var(--success);
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Regex Académico</h1>
+        <div id="level-indicator">Nível 1 de 10</div>
+    </header>
+
+    <main>
+        <!-- Seção Didática (Introdução) -->
+        <section class="intro-section">
+            <h2>O que são Expressões Regulares (ER)?</h2>
+            <p>Na Teoria da Computação, as <strong>Expressões Regulares</strong> são uma notação matemática e declarativa utilizada para descrever linguagens formais. Enquanto um autómato finito serve para <em>reconhecer</em> palavras, a expressão regular atua como um <em>gerador</em>, definindo as regras de construção dessas cadeias de caracteres.</p>
+            <p><strong>Qual é a sua importância?</strong> Elas formam a base teórica para a construção de analisadores léxicos (compiladores), processamento inteligente de texto e validação rigorosa de dados. Estão presentes nos bastidores de praticamente qualquer linguagem de programação moderna.</p>
+            <p><strong>Aplicações e Exemplos Práticos:</strong></p>
+            <ul>
+                <li><strong>Validação de Formatos:</strong> Garantir que um texto introduzido pelo utilizador corresponde a um E-mail válido, um Código Postal ou uma palavra-passe forte.</li>
+                <li><strong>Pesquisa Avançada:</strong> Encontrar num documento longo todos os números de telefone que começam com "9" e terminam com três zeros.</li>
+                <li><strong>Geração Formal:</strong> Num alfabeto Σ={a,b}, a expressão <code>(a+b)*</code> representa matematicamente a capacidade de gerar todas as combinações possíveis de 'a' e 'b', incluindo a cadeia vazia.</li>
+            </ul>
+
+            <h3 style="color: var(--primary); margin-top: 25px; font-size: 1.2rem;">Dicionário de Símbolos Académicos</h3>
+            <div class="symbol-dict">
+                <div class="symbol-card">
+                    <span class="sym">Σ</span> <span class="sym-title">(Alfabeto)</span>
+                    <p>Representa qualquer símbolo único do alfabeto em uso.</p>
+                    <span class="sym-example"><strong>Exemplo:</strong> Se o alfabeto for Σ={a,b}, usar "Σ" na ER equivale a "a+b" (aceita um 'a' ou um 'b').</span>
+                </div>
+                <div class="symbol-card">
+                    <span class="sym">ε</span> <span class="sym-title">(Cadeia Vazia)</span>
+                    <p>Representa a ausência de caracteres (comprimento nulo). É o elemento neutro.</p>
+                    <span class="sym-example"><strong>Exemplo:</strong> A expressão "AεB" é lida pelo motor simplesmente como a cadeia "AB".</span>
+                </div>
+                <div class="symbol-card">
+                    <span class="sym">∅</span> <span class="sym-title">(Conjunto Vazio)</span>
+                    <p>Representa uma linguagem impossível, que não contém nenhuma cadeia.</p>
+                    <span class="sym-example"><strong>Exemplo:</strong> Uma expressão definida como "∅" rejeitará absolutamente qualquer input (nem o ε é aceite).</span>
+                </div>
+                <div class="symbol-card">
+                    <span class="sym">+</span> <span class="sym-title">(União / OU)</span>
+                    <p>Permite ramificações lógicas, aceitando a expressão da esquerda OU da direita.</p>
+                    <span class="sym-example"><strong>Exemplo:</strong> "0+1" aceitará estritamente a cadeia com o dígito '0' ou a cadeia com '1'.</span>
+                </div>
+                <div class="symbol-card">
+                    <span class="sym">*</span> <span class="sym-title">(Fecho de Kleene)</span>
+                    <p>Indica que o elemento anterior pode ser repetido zero ou infinitas vezes.</p>
+                    <span class="sym-example"><strong>Exemplo:</strong> A expressão "c*" aceitará: ε, c, cc, ccc, cccc, etc.</span>
+                </div>
+                <div class="symbol-card">
+                    <span class="sym">( )</span> <span class="sym-title">(Agrupamento)</span>
+                    <p>Altera a precedência, permitindo aplicar operadores a um bloco completo.</p>
+                    <span class="sym-example"><strong>Exemplo:</strong> A expressão "(ab)*" aceitará os blocos juntos: ε, ab, abab, ababab, etc.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lado Esquerdo: Motor e Input -->
+        <section class="editor-section">
+            <div>
+                <h2>Desafio</h2>
+                <p class="problem-desc">
+                    Alfabeto: <span class="alphabet" id="ui-alphabet">Σ={0,1}</span><br><br>
+                    <span id="ui-desc">Enunciado aqui</span>
+                </p>
+            </div>
+
+            <div>
+                <input type="text" id="regex-input" placeholder="Digite a sua ER aqui..." autocomplete="off" spellcheck="false">
+            </div>
+
+            <div>
+                <p style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem;">Teclado de Símbolos Especiais:</p>
+                <div class="keyboard">
+                    <button class="key-btn" onclick="insertSymbol('Σ')" title="Exemplo: Se o alfabeto for {A,B}, usar Σ resulta em &quot;A&quot; ou &quot;B&quot;">Σ</button>
+                    <button class="key-btn" onclick="insertSymbol('ε')" title="Exemplo: AεB resulta simplesmente em &quot;AB&quot; (elemento neutro)">ε</button>
+                    <button class="key-btn" onclick="insertSymbol('∅')" title="Exemplo: Qualquer expressão com ∅ resulta num conjunto que não aceita nada">∅</button>
+                    <button class="key-btn" onclick="insertSymbol('+')" title="Exemplo: A+B resulta na aceitação de &quot;A&quot; ou &quot;B&quot;">+</button>
+                    <button class="key-btn" onclick="insertSymbol('*')" title="Exemplo: A* resulta em &quot;ε&quot;, &quot;A&quot;, &quot;AA&quot;, &quot;AAA&quot;...">*</button>
+                    <button class="key-btn" onclick="insertSymbol('(')" title="Exemplo: (A+B)C resulta em &quot;AC&quot; ou &quot;BC&quot;">(</button>
+                    <button class="key-btn" onclick="insertSymbol(')')" title="Finaliza o agrupamento. Exemplo: (AB)*">)</button>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button id="next-btn" onclick="nextLevel()">Próximo Nível →</button>
+            </div>
+            <div id="success-message">Linguagem validada com sucesso!</div>
+        </section>
+
+        <!-- Lado Direito: Bateria de Testes -->
+        <section class="tests-section">
+            <div class="test-column">
+                <h3 style="color: var(--success);">Cadeias Aceites (L)</h3>
+                <ul class="test-list" id="list-accepted">
+                    <!-- Gerado via JS -->
+                </ul>
+            </div>
+            
+            <div class="test-column">
+                <h3 style="color: var(--danger);">Cadeias Rejeitadas (∉ L)</h3>
+                <ul class="test-list" id="list-rejected">
+                    <!-- Gerado via JS -->
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        /* ==========================================================
+           BASE DE DADOS DE NÍVEIS (10 Níveis Completos)
+           ========================================================== */
+        const levels = [
+            {
+                id: 1,
+                alphabetText: "Σ={0,1}",
+                alphabetArray: ["0", "1"],
+                description: "Começa com qualquer quantidade de 1, seguido de um 0, e termina com qualquer quantidade de 1.",
+                accepted: ["0", "10", "01", "111011"],
+                rejected: ["ε", "1", "00", "1001"]
+            },
+            {
+                id: 2,
+                alphabetText: "Σ={c,d}",
+                alphabetArray: ["c", "d"],
+                description: "Cadeias que contenham 'cc' como subpalavra.",
+                accepted: ["cc", "dccd", "cccd", "dcc"],
+                rejected: ["ε", "c", "d", "cdc", "dcd"]
+            },
+            {
+                id: 3,
+                alphabetText: "Σ={a,b}",
+                alphabetArray: ["a", "b"],
+                description: "A linguagem que aceita estritamente as cadeias 'ab' ou 'ba'. (Sugestão: utilize a operação de União).",
+                accepted: ["ab", "ba"],
+                rejected: ["ε", "a", "b", "aa", "bb", "aba"]
+            },
+            {
+                id: 4,
+                alphabetText: "Σ={x,y}",
+                alphabetArray: ["x", "y"],
+                description: "Cadeias de comprimento no máximo 1 (Sugestão: a cadeia vazia também possui comprimento menor ou igual a 1).",
+                accepted: ["ε", "x", "y"],
+                rejected: ["xx", "xy", "yx", "xyx"]
+            },
+            {
+                id: 5,
+                alphabetText: "Σ={a,b}",
+                alphabetArray: ["a", "b"],
+                description: "Qualquer combinação de 'a' e 'b' (incluindo nenhuma), mas que termine obrigatoriamente com a letra 'a'.",
+                accepted: ["a", "ba", "aba", "bba", "aaaa"],
+                rejected: ["ε", "b", "ab", "bb"]
+            },
+            {
+                id: 6,
+                alphabetText: "Σ={0,1}",
+                alphabetArray: ["0", "1"],
+                description: "Cadeias formadas exclusivamente por blocos de '00' (ou seja, quantidade par de zeros e nenhum 1).",
+                accepted: ["ε", "00", "0000", "000000"],
+                rejected: ["0", "1", "01", "000", "100", "00100"]
+            },
+            {
+                id: 7,
+                alphabetText: "Σ={a,b,c}",
+                alphabetArray: ["a", "b", "c"],
+                description: "Todas as cadeias que começam com 'a', seguidas de qualquer combinação de 'b' ou 'c'.",
+                accepted: ["a", "ab", "ac", "abb", "abc", "acb"],
+                rejected: ["ε", "b", "c", "ba", "ca"]
+            },
+            {
+                id: 8,
+                alphabetText: "Σ={0,1}",
+                alphabetArray: ["0", "1"],
+                description: "A linguagem vazia. Não aceita absolutamente nenhuma cadeia (nem sequer a cadeia vazia).",
+                accepted: [], // Array vazio, requer lógica visual para mostrar que não há nada a aceitar
+                rejected: ["ε", "0", "1", "00", "01"]
+            },
+            {
+                id: 9,
+                alphabetText: "Σ={a,b}",
+                alphabetArray: ["a", "b"],
+                description: "Cadeias que possuem exatamente um único 'b' em toda a palavra.",
+                accepted: ["b", "ab", "ba", "aabaa", "aaaab"],
+                rejected: ["ε", "a", "bb", "abaaab", "bab"]
+            },
+            {
+                id: 10,
+                alphabetText: "Σ={0,1}",
+                alphabetArray: ["0", "1"],
+                description: "Desafio Final: O fechamento positivo (Σ⁺). Qualquer cadeia válida do alfabeto, exceto a cadeia vazia.",
+                accepted: ["0", "1", "00", "01", "10", "11", "010"],
+                rejected: ["ε"]
+            }
+        ];
+
+        let currentLevel = 0;
+        const inputField = document.getElementById('regex-input');
+
+        /* ==========================================================
+           O MOTOR CONVERSOR (Lógica Académica -> Regex JS)
+           ========================================================== */
+        function convertFormalToJSRegex(formalRegex, currentAlphabetArr) {
+            let jsRegex = formalRegex;
+
+            // 1. O Símbolo Sigma (Σ)
+            // Se o utilizador digitar Σ, substituímos por uma união de todo o alfabeto atual
+            const sigmaRegex = '(' + currentAlphabetArr.join('|') + ')';
+            jsRegex = jsRegex.replace(/Σ/g, sigmaRegex);
+
+            // 2. A União (+)
+            // Na matemática usamos '+', mas a máquina do JS usa '|'
+            jsRegex = jsRegex.replace(/\+/g, '|');
+
+            // 3. A Cadeia Vazia (ε)
+            // Na ER académica, ε concatena como neutro. 
+            // Ao remover o 'ε', o Motor JS simula o comportamento da cadeia vazia
+            jsRegex = jsRegex.replace(/ε/g, '');
+
+            // 4. O Conjunto Vazio (∅)
+            // Um conjunto vazio não aceita nada. No Regex de máquina usamos um 
+            // Negative Lookahead impossível (?!) para garantir que nunca valida.
+            jsRegex = jsRegex.replace(/∅/g, '(?!)');
+
+            return jsRegex;
+        }
+
+        /* ==========================================================
+           LÓGICA DA INTERFACE E VALIDAÇÃO
+           ========================================================== */
+        function loadLevel(index) {
+            if (index >= levels.length) {
+                alert("Parabéns! Concluiu todos os níveis do Regex Académico.");
+                currentLevel = 0; // Reinicia o jogo
+                index = 0;
+            }
+            
+            const levelData = levels[index];
+            document.getElementById('level-indicator').innerText = `Nível ${index + 1} de ${levels.length}`;
+            document.getElementById('ui-alphabet').innerText = levelData.alphabetText;
+            document.getElementById('ui-desc').innerText = levelData.description;
+            inputField.value = "";
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+
+            // Renderizar Listas
+            renderList('list-accepted', levelData.accepted, true);
+            renderList('list-rejected', levelData.rejected, false);
+
+            // Forçar validação inicial
+            validateInput();
+        }
+
+        function renderList(elementId, items, isAcceptedList) {
+            const ul = document.getElementById(elementId);
+            ul.innerHTML = '';
+            
+            // Tratamento especial para o nível 8 (Conjunto Vazio)
+            if (items.length === 0 && isAcceptedList) {
+                const li = document.createElement('div');
+                li.className = 'empty-set-msg';
+                li.innerText = 'Linguagem Vazia (Nenhuma cadeia deve ser aceite)';
+                ul.appendChild(li);
+                return;
+            }
+
+            items.forEach((item, idx) => {
+                const li = document.createElement('li');
+                li.className = 'test-item';
+                li.id = `${elementId}-item-${idx}`;
+                li.innerHTML = `<span>${item}</span> <span class="status-icon" id="${elementId}-icon-${idx}">-</span>`;
+                ul.appendChild(li);
+            });
+        }
+
+        function insertSymbol(symbol) {
+            const start = inputField.selectionStart;
+            const end = inputField.selectionEnd;
+            const text = inputField.value;
+            
+            // Insere o caracter onde o cursor estava
+            inputField.value = text.substring(0, start) + symbol + text.substring(end);
+            
+            // Devolve o foco e ajusta o cursor
+            inputField.focus();
+            inputField.selectionStart = inputField.selectionEnd = start + symbol.length;
+            
+            // Dispara validação
+            validateInput();
+        }
+
+        function validateInput() {
+            const rawInput = inputField.value;
+            const levelData = levels[currentLevel];
+            let regexObj = null;
+            let isValidSyntax = false;
+
+            // Só tenta validar se o utilizador digitou algo
+            if (rawInput.trim().length > 0) {
+                try {
+                    const jsPattern = convertFormalToJSRegex(rawInput, levelData.alphabetArray);
+                    // ^ e $ forçam a verificação exata da cadeia completa
+                    regexObj = new RegExp(`^(${jsPattern})$`);
+                    isValidSyntax = true;
+                } catch (e) {
+                    // Regex inválida (ex: parênteses abertos, união sem operando)
+                    isValidSyntax = false;
+                }
+            }
+
+            let allTestsPassed = true;
+
+            // Validar Cadeias Aceites (Precisam dar Match = true)
+            levelData.accepted.forEach((str, idx) => {
+                const itemEl = document.getElementById(`list-accepted-item-${idx}`);
+                const iconEl = document.getElementById(`list-accepted-icon-${idx}`);
+                
+                // Se o texto for "ε", a string a testar pelo motor JS é ""
+                const testStr = str === 'ε' ? '' : str;
+                
+                let passed = false;
+                if (isValidSyntax) {
+                    passed = regexObj.test(testStr);
+                }
+
+                updateItemUI(itemEl, iconEl, passed, rawInput.trim() === '');
+                if (!passed) allTestsPassed = false;
+            });
+
+            // Validar Cadeias Rejeitadas (Precisam dar Match = false)
+            levelData.rejected.forEach((str, idx) => {
+                const itemEl = document.getElementById(`list-rejected-item-${idx}`);
+                const iconEl = document.getElementById(`list-rejected-icon-${idx}`);
+                
+                const testStr = str === 'ε' ? '' : str;
+                
+                let passed = false;
+                if (isValidSyntax) {
+                    // Passou no teste de rejeição se NÃO deu match!
+                    passed = !regexObj.test(testStr);
+                }
+
+                updateItemUI(itemEl, iconEl, passed, rawInput.trim() === '');
+                if (!passed) allTestsPassed = false;
+            });
+
+            // Gerir estado de Sucesso
+            if (rawInput.trim() === '') allTestsPassed = false; // Input vazio não resolve fases
+            
+            if (allTestsPassed) {
+                document.getElementById('next-btn').style.display = 'block';
+                document.getElementById('success-message').style.display = 'block';
+            } else {
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('success-message').style.display = 'none';
+            }
+        }
+
+        // Função auxiliar para mudar as cores e ícones
+        function updateItemUI(liEl, iconEl, isPassing, isInputEmpty) {
+            if (!liEl || !iconEl) return;
+
+            liEl.classList.remove('pass', 'fail');
+            
+            if (isInputEmpty) {
+                iconEl.innerText = '-';
+                return;
+            }
+
+            if (isPassing) {
+                liEl.classList.add('pass');
+                iconEl.innerText = '✓';
+            } else {
+                liEl.classList.add('fail');
+                iconEl.innerText = '✗';
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            loadLevel(currentLevel);
+        }
+
+        // Event Listeners
+        inputField.addEventListener('input', validateInput);
+
+        // Inicializar Jogo
+        window.onload = () => loadLevel(currentLevel);
+
+    </script>
+</body>
+</html>
