@@ -50,6 +50,37 @@
             color: var(--primary);
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 5px 15px;
+            border: 1px solid #323238;
+            border-radius: 20px;
+            background-color: var(--keyboard-bg);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            background-color: var(--keyboard-hover);
+            color: var(--primary-hover);
+        }
+
         #level-indicator {
             font-weight: bold;
             color: var(--text-muted);
@@ -140,6 +171,17 @@
         @media (max-width: 900px) {
             main {
                 grid-template-columns: 1fr;
+            }
+
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
             }
         }
 
@@ -361,7 +403,10 @@
 
     <header>
         <h1>Expressões Regulares</h1>
-        <div id="level-indicator">Nível 1 de 10</div>
+        <div class="header-actions">
+            <a class="nav-link" href="regex.html">Demonstrador livre</a>
+            <div id="level-indicator">Nível 1 de 10</div>
+        </div>
     </header>
 
     <main>

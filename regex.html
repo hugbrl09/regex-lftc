@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstrador de Regex</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app-shell">
+        <section class="workspace" aria-label="Laboratorio de expressoes regulares">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">LFTC / laboratorio interativo</p>
+                    <h1>Demonstrador de Regex</h1>
+                </div>
+                <div class="topbar-actions">
+                    <a class="project-link" href="index.html">Site principal</a>
+                    <p class="status-pill" id="regexStatus" role="status">Aguardando padrao</p>
+                </div>
+            </header>
+
+            <div class="main-grid">
+                <section class="panel editor-panel" aria-labelledby="editorTitle">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="kicker">Entrada</p>
+                            <h2 id="editorTitle">Padrao e texto</h2>
+                        </div>
+                    </div>
+
+                    <label class="field-label" for="inputRegex">Express&atilde;o regular</label>
+                    <div class="regex-composer" data-testid="regex-composer">
+                        <span aria-hidden="true">/</span>
+                        <input id="inputRegex" type="text" autocomplete="off" spellcheck="false" placeholder="\b\w+@\w+\.\w+\b">
+                        <span aria-hidden="true">/</span>
+                    </div>
+
+                    <fieldset class="flag-set">
+                        <legend>Flags</legend>
+                        <label class="flag-option" title="Busca todas as ocorrencias">
+                            <input type="checkbox" id="flagG" value="g" checked>
+                            <span>g</span>
+                            <small>global</small>
+                        </label>
+                        <label class="flag-option" title="Ignora diferenca entre maiusculas e minusculas">
+                            <input type="checkbox" id="flagI" value="i">
+                            <span>i</span>
+                            <small>ignore case</small>
+                        </label>
+                        <label class="flag-option" title="Faz ^ e $ considerarem cada linha">
+                            <input type="checkbox" id="flagM" value="m">
+                            <span>m</span>
+                            <small>multiline</small>
+                        </label>
+                        <label class="flag-option" title="Faz . tambem casar quebras de linha">
+                            <input type="checkbox" id="flagS" value="s">
+                            <span>s</span>
+                            <small>dot all</small>
+                        </label>
+                        <label class="flag-option" title="Ativa leitura Unicode do padrao">
+                            <input type="checkbox" id="flagU" value="u">
+                            <span>u</span>
+                            <small>unicode</small>
+                        </label>
+                        <label class="flag-option" title="Casa apenas a partir da posicao atual">
+                            <input type="checkbox" id="flagY" value="y">
+                            <span>y</span>
+                            <small>sticky</small>
+                        </label>
+                    </fieldset>
+
+                    <div class="button-row">
+                        <button type="button" class="secondary-button" id="escapeSelectionButton">Escapar selecao</button>
+                        <button type="button" class="secondary-button" id="copyRegexButton">Copiar regex</button>
+                        <button type="button" class="ghost-button" id="clearButton">Limpar</button>
+                    </div>
+
+                    <label class="field-label" for="inputText">Texto de teste</label>
+                    <textarea id="inputText" spellcheck="false" placeholder="Digite ou cole aqui o texto que sera analisado..."></textarea>
+                </section>
+
+                <section class="panel result-panel" aria-labelledby="resultTitle">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="kicker">Visualizacao</p>
+                            <h2 id="resultTitle">Matches no texto</h2>
+                        </div>
+                        <div class="match-nav" aria-label="Navegacao entre matches">
+                            <button type="button" id="prevMatchButton" aria-label="Match anterior">&lt;</button>
+                            <span id="selectedMatchLabel">0 / 0</span>
+                            <button type="button" id="nextMatchButton" aria-label="Proximo match">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="highlighted-output" id="highlightedText" aria-live="polite"></div>
+                    <p class="inline-message" id="inlineMessage">Informe um padrao para comecar.</p>
+                </section>
+
+                <aside class="panel inspector-panel" aria-labelledby="inspectorTitle">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="kicker">Inspecao</p>
+                            <h2 id="inspectorTitle">Como a regex casou</h2>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid" aria-label="Resumo dos resultados">
+                        <div>
+                            <strong id="matchCount">0</strong>
+                            <span>matches</span>
+                        </div>
+                        <div>
+                            <strong id="groupCount">0</strong>
+                            <span>grupos</span>
+                        </div>
+                        <div>
+                            <strong id="literalRegex">/ /</strong>
+                            <span>literal</span>
+                        </div>
+                    </div>
+
+                    <div class="tab-list" role="tablist" aria-label="Paineis de inspecao">
+                        <button type="button" class="tab-button is-active" role="tab" aria-selected="true" aria-controls="matchesPanel" data-tab="matches">Matches</button>
+                        <button type="button" class="tab-button" role="tab" aria-selected="false" aria-controls="groupsPanel" data-tab="groups">Grupos</button>
+                        <button type="button" class="tab-button" role="tab" aria-selected="false" aria-controls="referencePanel" data-tab="reference">Referencia</button>
+                    </div>
+
+                    <div class="tab-panel" id="matchesPanel" role="tabpanel">
+                        <div class="match-list" id="matchList"></div>
+                    </div>
+                    <div class="tab-panel" id="groupsPanel" role="tabpanel" hidden>
+                        <div class="group-list" id="groupList"></div>
+                    </div>
+                    <div class="tab-panel" id="referencePanel" role="tabpanel" hidden>
+                        <div class="reference-list" id="referenceList"></div>
+                    </div>
+                </aside>
+            </div>
+
+            <section class="examples-band" aria-labelledby="examplesTitle">
+                <div class="examples-heading">
+                    <div>
+                        <p class="kicker">Atalhos</p>
+                        <h2 id="examplesTitle">Exemplos prontos</h2>
+                    </div>
+                    <p>Use um exemplo para ver classes, quantificadores, grupos e ancoras em acao.</p>
+                </div>
+                <div class="examples-grid" id="examplesGrid"></div>
+            </section>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
