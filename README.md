@@ -67,4 +67,44 @@ O arquivo `index.html` inclui uma função chamada `convertFormalToJSRegex()` qu
 - Expressão académica: `Σ*0Σ*` (todas as cadeias do alfabeto que contenham um `0` em qualquer posição)
 - Se `Σ={0,1}`, a conversão gera: `(0|1)*0(0|1)*` e, com âncoras, `^((0|1)*0(0|1)*)$` — pronto para ser usado pelo `RegExp` do JS.
 
-Se quiser, posso acrescentar um pequeno diagrama ou um exemplo interativo no `README.md` demonstrando a conversão passo a passo com uma expressão real.
+---
+
+## Exemplo interativo (passo a passo)
+
+Segue um exemplo prático e comentado que demonstra, passo a passo, a conversão de uma expressão formal para um padrão JavaScript utilizável.
+
+**Expressão académica de exemplo:** `Σ*0Σ*`
+
+**Alfabeto:** `Σ = {0, 1}`
+
+Passos:
+
+1. Substituir `Σ` por uma união explícita do alfabeto
+
+	- `Σ` → `(0|1)`
+	- Resultado parcial: `(0|1)*0(0|1)*`
+
+2. Aplicar regras adicionais (se presentes)
+
+	- `+` → `|` (união)
+	- `ε` → removido (cadeia vazia concatenada não altera a sequência)
+	- `∅` → `(?!)` (negative lookahead impossível)
+
+3. Encapsular com âncoras para correspondência exata
+
+	- Final: `^((0|1)*0(0|1)*)$`
+
+4. Exemplo em JavaScript (uso real com a função do projeto)
+
+```javascript
+// Entrada formal
+const formal = 'Σ*0Σ*';
+const alphabet = ['0', '1'];
+
+// Função presente em index.html
+const jsPattern = convertFormalToJSRegex(formal, alphabet); // -> (0|1)*0(0|1)*
+const regex = new RegExp(`^(${jsPattern})$`);
+
+console.log(regex.test('010')); // true
+console.log(regex.test(''));    // false
+```
